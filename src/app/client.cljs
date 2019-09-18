@@ -13,34 +13,43 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Button Component
+;; MUTATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmutation reset-click-count [_]
+  (action [{:keys [state]}]
+          (swap! state update :ui/number 0)))
+
+(defmutation decrease-click-count [_]
+  (action [{:keys [state]}]
+          (swap! state update :ui/number inc)))
 
 (defmutation increase-click-count [_]
   (action [{:keys [state]}]
           (swap! state update :ui/number inc)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Button Component
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;(defsc ButtonComponent [this props]
-;  {:query         []
-;   #_#_:ident []
-;   :initial-state {}}
-;  (dom/button "Button"))
-;
-;(def ui-button-component (comp/factory ui-button-component))
+(defsc ButtonComponent [this {:ui/keys [number] :as props}]
+  {:query         [:ui/number]
+   :ident         [:root :ui/number]
+   :initial-state {:ui/number 0}}
+  (dom/button {:onClick #(comp/transact! this `[(increase-click-count {})])}
+              "You've clicked the button " number " times"))
+
+(def ui-button-component (comp/factory ButtonComponent))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ROOT Component
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defsc Root [this {:ui/keys [number]}]
-  {:query         [:ui/number]
-   :initial-state {:ui/number 0}}
-  (js/console.log "Render Root")
-  (dom/button {:onClick #(comp/transact! this `[(increase-click-count {})])}
-              "You've clicked the button " number " times"))
-
+(defsc Root [this {:keys [root] :as props}]
+  {:query [:root (comp/get-query ui-button-component)]}
+  (ui-button-component))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; APP definition and init
@@ -52,7 +61,6 @@
   (app/mount! APP Root "app"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 (comment
   (shadow/repl :main)
@@ -68,4 +76,9 @@
 
   (reset! (::app/state-atom APP) {})
 
-  (app/current-state APP))
+  (app/current-state APP)
+
+
+  (comp/get-query Root)
+
+  )
