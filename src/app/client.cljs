@@ -13,9 +13,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(defsc Root [this {:root/keys [people]}]
+(defsc Root [this props]
   {:query         []
-   :initial-state {}
+   :initial-state {}}
   (js/console.log "Render Root")
   (dom/h1 :.ui.header "Hello, Fulcro!"))
 
@@ -35,8 +35,6 @@
 
   (::app/state-atom APP)
 
-  (keys APP)
-
   (-> APP
       (::app/state-atom)
       deref)
@@ -45,6 +43,4 @@
 
   (reset! (::app/state-atom APP) {})
 
-  (app/current-state APP)
-
-  (swap! (::app/state-atom APP) assoc-in [:person/id 3 :person/age] 22))
+  (app/current-state APP))
