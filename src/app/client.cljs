@@ -17,14 +17,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MUTATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;; FIXME
 (defmutation reset-click-count [_]
   (action [{:keys [state]}]
-          (swap! state update :ui/number 0)))
+          (swap! state assoc :ui/number 0)))
 
 (defmutation decrease-click-count [_]
   (action [{:keys [state]}]
-          (swap! state update :ui/number inc)))
+          (swap! state update :ui/number dec)))
 
 (defmutation increase-click-count [_]
   (action [{:keys [state]}]
@@ -33,23 +33,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Button Component
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defsc ButtonComponent [this {:ui/keys [number] :as props}]
-  {:query         [:ui/number]
-   :ident         [:root :ui/number]
-   :initial-state {:ui/number 0}}
-  (dom/button {:onClick #(comp/transact! this `[(increase-click-count {})])}
-              "You've clicked the button " number " times"))
-
-(def ui-button-component (comp/factory ButtonComponent))
+;; TODO extract the button component from the Root
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ROOT Component
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defsc Root [this {:keys [root] :as props}]
-  {:query [:root (comp/get-query ui-button-component)]}
-  (ui-button-component))
+(defsc Root [this {:ui/keys [number]}]
+  {:query         [:ui/number]
+   :initial-state {:ui/number 0}}
+  (dom/div
+    (dom/div number)
+    (dom/div
+      (dom/button {:onClick #(comp/transact! this `[(increase-click-count {})])}
+                  "Click to increase count "))
+    (dom/div
+      (dom/button {:onClick #(comp/transact! this `[(decrease-click-count {})])}
+                  "Click to decrease count "))
+    (dom/div
+      (dom/button {:onClick #(comp/transact! this `[(reset-click-count {})])}
+                  "Click to reset count "))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; APP definition and init
@@ -77,7 +81,6 @@
   (reset! (::app/state-atom APP) {})
 
   (app/current-state APP)
-
 
   (comp/get-query Root)
 
