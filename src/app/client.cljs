@@ -14,14 +14,32 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Button Component
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmutation increase-click-count [_]
+  (action [{:keys [state]}]
+          (swap! state update :ui/number inc)))
+
+
+;(defsc ButtonComponent [this props]
+;  {:query         []
+;   #_#_:ident []
+;   :initial-state {}}
+;  (dom/button "Button"))
+;
+;(def ui-button-component (comp/factory ui-button-component))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ROOT Component
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defsc Root [this props]
-  {:query         []
-   :initial-state {}}
+(defsc Root [this {:ui/keys [number]}]
+  {:query         [:ui/number]
+   :initial-state {:ui/number 0}}
   (js/console.log "Render Root")
-  (dom/h1 :.ui.header "Hello, Fulcro!"))
+  (dom/button {:onClick #(comp/transact! this `[(increase-click-count {})])}
+              "You've clicked the button " number " times"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -41,8 +59,6 @@
 
   ;; js hard reset
   (.reload js/location true)
-
-  (::app/state-atom APP)
 
   (-> APP
       (::app/state-atom)
